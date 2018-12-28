@@ -1,0 +1,10 @@
+bin
+lib
+logs
+.settings
+**/*.obj
+**/*.java~
+**/Yylex.java
+.idea
+out
+**/*.svg
