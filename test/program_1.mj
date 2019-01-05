@@ -1,0 +1,37 @@
+program MJProgram
+	// NOTE: .mj program is case sensitive.
+	// NOTE: Ovo su deklaracije globalnih promenljivih, koje se inicijalizuju na nulu
+	int x, y; int y;
+	bool flag = true;
+	char string[4] = "moja";
+	// NOTE: char x; nije dozvoljenu redeklarisati promenljivu u istom opsegu
+	int x[];
+	// NOTE: zavrsena alokacija globalnih podataka i pocinje definicij procedura { } - scope
+{
+	// NOTE: lokalne promenljive(ne pripadaju globalnom scope-u) se definisu van tela funkcije
+	// NOTE: povratna vrednost, kljucna rec return....
+	int k () int c; {
+		c = 0;
+		// NOTE: standardni operatori osnovnih matematickih operacija i operatori dodele
+		return c+3;
+	}
+
+	// NOTE: ispravno
+	void moja() {
+		return;
+	}
+
+	int main() {
+		// NOTE: standardni izlaz
+		print(1);
+		x = new int[3]
+		// NOTE: predefinisana metode - pripadaju globalnom opsegu(universe)
+		print(ord(chr(32)), len(x), eol)
+		// NOTE: standardni izlaz, u ovom kontekstu se shvata da je adresa. Ne postoji operator za dohvatanje adrese
+		read(y)
+		x = y+3;
+		// NOTE: proceduralna kompozicija
+		k();
+		print(2);
+	}
+}
