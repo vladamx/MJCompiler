@@ -23,12 +23,14 @@ public class MJParserTest {
 	
 	public static void main(String[] args) throws Exception {
 		Logger log = Logger.getLogger(MJParserTest.class);
+
 		if (args.length < 2) {
 			log.error("Not enough arguments supplied! Usage: MJParser <source-file> <obj-file> ");
 			return;
 		}
 		
 		File sourceCode = new File(args[0]);
+
 		if (!sourceCode.exists()) {
 			log.error("Source file [" + sourceCode.getAbsolutePath() + "] not found!");
 			return;
@@ -39,7 +41,7 @@ public class MJParserTest {
 		try (BufferedReader br = new BufferedReader(new FileReader(sourceCode))) {
 			Yylex lexer = new Yylex(br);
 			MJParser p = new MJParser(lexer);
-	        Symbol s = p.parse();  //pocetak parsiranja
+	        Symbol s = p.parse();  // NOTE: pocetak parsiranja
 	        SyntaxNode prog = (SyntaxNode)(s.value);
 	        
 			Tab.init(); // Universe scope
@@ -55,7 +57,7 @@ public class MJParserTest {
 	        	if (objFile.exists())
 	        		objFile.delete();
 	        	
-	        	// Code generation...
+	        	// NOTE: Code generation...
 	        	CodeGenerator codeGenerator = new CodeGenerator();
 	        	prog.traverseBottomUp(codeGenerator);
 	        	Code.dataSize = semanticCheck.nVars;
