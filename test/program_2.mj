@@ -1,0 +1,7 @@
+program Adder
+const int x = 3, y = 5;
+{
+    void main() {
+       print(x + y);
+    }
+}

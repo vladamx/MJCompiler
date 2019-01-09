@@ -23,15 +23,7 @@
       <sourceFolder url="file://$MODULE_DIR$/config" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library">
-      <library name="cup_v10k.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/cup_v10k.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
+    <orderEntry type="library" name="zcup_v10k" level="project" />
     <orderEntry type="module-library">
       <library name="JFlex.jar">
         <CLASSES>

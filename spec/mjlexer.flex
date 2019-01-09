@@ -72,6 +72,8 @@ import java_cup.runtime.Symbol;
 	"else"   { return new_symbol(sym.ELSE, yytext()); }
 	"if"   { return new_symbol(sym.IF, yytext()); }
 	"new"   { return new_symbol(sym.NEW, yytext()); }
+	"const"   { return new_symbol(sym.CONST, yytext()); }
+	"enum"   { return new_symbol(sym.ENUM, yytext()); }
 	"print"   { return new_symbol(sym.PRINT, yytext()); }
 	"read"   { return new_symbol(sym.READ, yytext()); }
 	"return"   { return new_symbol(sym.RETURN, yytext()); }
@@ -87,20 +89,20 @@ import java_cup.runtime.Symbol;
 	"*" 		{ return new_symbol(sym.MUL, yytext()); }
 	"/" 		{ return new_symbol(sym.DIV, yytext()); }
 	"%" 		{ return new_symbol(sym.MOD, yytext()); }
-	"==" 		{ return new_symbol(sym.EQUAL, yytext()); }
-	"!=" 		{ return new_symbol(sym.NOTEQUAL, yytext()); }
+	"==" 		{ return new_symbol(sym.SAME, yytext()); }
+	"!=" 		{ return new_symbol(sym.NOT_SAME, yytext()); }
 	">" 		{ return new_symbol(sym.GREATER, yytext()); }
 	">=" 		{ return new_symbol(sym.GREATER_EQUAL, yytext()); }
 	"<" 		{ return new_symbol(sym.LOWER, yytext()); }
 	"<=" 		{ return new_symbol(sym.LOWER_EQUAL, yytext()); }
 	"&&" 		{ return new_symbol(sym.AND, yytext()); }
 	"||" 		{ return new_symbol(sym.OR, yytext()); }
-	"=" 		{ return new_symbol(sym.ASSIGN, yytext()); }
+	"=" 		{ return new_symbol(sym.EQUAL, yytext()); }
 	"++" 		{ return new_symbol(sym.INCREMENT, yytext()); }
 	"--" 		{ return new_symbol(sym.DECREMENT, yytext()); }
 	";" 		{ return new_symbol(sym.SEMI, yytext()); }
 	"," 		{ return new_symbol(sym.COMMA, yytext()); }
-	"." 		{ return new_symbol(sym.POINTER_DEREFERENCE, yytext()); }
+	"." 		{ return new_symbol(sym.POINT, yytext()); }
 	"(" 		{ return new_symbol(sym.LPAREN, yytext()); }
 	")" 		{ return new_symbol(sym.RPAREN, yytext()); }
 	"[" 		{ return new_symbol(sym.LBRACKET, yytext()); }
@@ -109,26 +111,13 @@ import java_cup.runtime.Symbol;
 	"}"			{ return new_symbol(sym.RBRACE, yytext()); }
 
 	/* constants */
-	[0-9]+  { return new_symbol(sym.NUMBER, new Integer (yytext())); }
- 	\"                  { string.setLength(0); yybegin(STRING); }
-	"true" | "false" { return new_symbol(sym.BOOLEAN, Boolean.valueOf(yytext())); }
+    [0-9]+                        { return new_symbol(sym.NUMBER, new Integer (yytext())); }
+ 	'[\040-\176]'                  { return  new_symbol(sym.CHAR, new Character(yytext().charAt(1))); }
+	"true" | "false"               { return new_symbol(sym.BOOLEAN, Boolean.valueOf(yytext())); }
 
 	/* identifiers */
 	([a-z]|[A-Z])[a-z|A-Z|0-9|_]* 	{return new_symbol (sym.IDENT, yytext()); }
 	"//" 		     { yybegin(COMMENT); }
-}
-
-<STRING> {
-      \"                             { yybegin(YYINITIAL);
-                                       return new_symbol(sym.STRING,
-                                       string.toString()); }
-      [^\n\r\"\\]+                   { string.append( yytext() ); }
-      \\t                            { string.append('\t'); }
-      \\n                            { string.append('\n'); }
-
-      \\r                            { string.append('\r'); }
-      \\\"                           { string.append('\"'); }
-      \\                             { string.append('\\'); }
 }
 
 <COMMENT> .      { yybegin(COMMENT); }

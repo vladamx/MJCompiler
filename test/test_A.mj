@@ -8,7 +8,7 @@ program test301
 	const int pet = 5;
 
 	int niz[];
-	char nizch[];
+	char nizch[], nizch1[];
 
 {
 	void main()
