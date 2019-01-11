@@ -154,7 +154,17 @@ public class SemanticPass extends VisitorAdaptor {
 	public void visit(PrintStmt printStmt){
 
 	}
-
+    public void visit(MulExprTerm expr) {
+        Struct te = expr.getTerm().struct;
+        Struct t = expr.getFactor().struct;
+        if (te.equals(t) && te == Tab.intType) {
+            expr.struct = te;
+        }
+        else {
+            report_error("Greska na liniji "+ expr.getLine()+" : nekompatibilni tipovi u izrazu za mnozenje.", null);
+            expr.struct = Tab.noType;
+        }
+    }
 	public void visit(AddExpr addExpr) {
 		Struct te = addExpr.getExpr().struct;
 		Struct t = addExpr.getTerm().struct;
@@ -173,6 +183,19 @@ public class SemanticPass extends VisitorAdaptor {
 
 	public void visit(LiteralFactor term) {
 		term.struct = term.getTypeLiteral().struct;
+	}
+
+	@Override
+	public void visit(BracketExprFactor factor) {
+		factor.struct = factor.getExpr().struct;
+	}
+
+	@Override
+	public void visit(NegTermExpr negTermExpr) {
+		if(negTermExpr.getTerm().struct != Tab.intType) {
+			report_error("Greska na liniji "+ negTermExpr.getLine()+" : nekompatibilni tip u izrazu za negaciju.", null);
+		}
+		negTermExpr.struct = negTermExpr.getTerm().struct;
 	}
 
 	public void visit(FactorTerm term) {

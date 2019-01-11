@@ -14,7 +14,30 @@ public class ExprGenerator extends VisitorAdaptor {
     }
     @Override
     public void visit(AddExpr addExpr) {
-        Code.put(Code.add);
+        if(addExpr.getAddop().getClass() == PlusAddop.class) {
+            Code.put(Code.add);
+        }
+        if(addExpr.getAddop().getClass() == MinusAddop.class) {
+            Code.put(Code.sub);
+        }
+    }
+
+    @Override
+    public void visit(NegTermExpr negTermExpr) {
+        Code.put(Code.neg);
+    }
+
+    @Override
+    public void visit(MulExprTerm mulExprTerm) {
+        if(mulExprTerm.getMulop().getClass() == MulMulop.class) {
+            Code.put(Code.mul);
+        }
+        if(mulExprTerm.getMulop().getClass() == DivMulop.class) {
+            Code.put(Code.div);
+        }
+        if(mulExprTerm.getMulop().getClass() == ModMulop.class) {
+            Code.put(Code.rem);
+        }
     }
 
     @Override
