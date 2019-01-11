@@ -45,13 +45,23 @@ public class SemanticPass extends VisitorAdaptor {
 		varDecl.traverseTopDown(new VisitorAdaptor() {
 			@Override
 			public void visit(SimpleVarDeclItem varDeclItem) {
-				report_info("Deklarisana promenljiva " + varDeclItem.getVarName(),varDeclItem);
-				Tab.insert(Obj.Var, varDeclItem.getVarName(), type.struct);
+				Obj obj = Tab.currentScope().findSymbol(varDeclItem.getVarName());
+				if(obj == null) {
+					report_info("Deklarisana promenljiva " + varDeclItem.getVarName(), varDeclItem);
+					Tab.insert(Obj.Var, varDeclItem.getVarName(), type.struct);
+				} else {
+					report_error("Promenljiva " + varDeclItem.getVarName() + " je vec deklarisana" , varDeclItem);
+				}
 			}
 			@Override
 			public void visit(ArrayVarDeclItem varDeclItem) {
-				report_info("Deklarisan niz " + varDeclItem.getVarName(),varDeclItem);
-				Tab.insert(Obj.Var, varDeclItem.getVarName(), new Struct(Struct.Array, type.struct));
+				Obj obj = Tab.currentScope().findSymbol(varDeclItem.getVarName());
+				if(obj == null) {
+					report_info("Deklarisan niz " + varDeclItem.getVarName(),varDeclItem);
+					Tab.insert(Obj.Var, varDeclItem.getVarName(), new Struct(Struct.Array, type.struct));
+				} else {
+					report_error("Promenljiva " + varDeclItem.getVarName() + " je vec deklarisana" , varDeclItem);
+				}
 			}
 		});
 	}
@@ -62,18 +72,47 @@ public class SemanticPass extends VisitorAdaptor {
 			private Integer value;
 			@Override
 			public void visit(ConstDeclItem constDeclItem) {
-				report_info("Deklarisana konstanta " + constDeclItem.getName(),constDeclItem);
-				Obj insert = Tab.insert(Obj.Con, constDeclItem.getName(), type.struct);
-				insert.setAdr(this.value);
-				constDeclItem.obj = insert;
+				if(type.struct == constDeclItem.getTypeLiteral().struct) {
+					Obj obj = Tab.currentScope().findSymbol(constDeclItem.getName());
+					if(obj == null) {
+						report_info("Deklarisana konstanta " + constDeclItem.getName(), constDeclItem);
+						Obj insert = Tab.insert(Obj.Con, constDeclItem.getName(), type.struct);
+						insert.setAdr(this.value);
+						constDeclItem.obj = insert;
+					} else {
+						report_error("Konstanta " + constDeclItem.getName() + " je vec deklarisana" , constDeclItem);
+					}
+				} else {
+					report_error("Tip literala i tip konstante se ne slazu", constDeclItem);
+				}
 			}
 			@Override
 			public void visit(NumberLiteral numberLiteral) {
 				this.value = numberLiteral.getValue();
 			}
+			public void visit(CharLiteral cnst){
+				this.value = Character.getNumericValue(cnst.getValue());
+			}
+
 		});
 	}
 
+	@Override
+	public void visit(BoolLiteral boolLiteral) {
+			// TODO: Bool type does not exist in tab
+	}
+
+	@Override
+	public void visit(EnumDecl enumDecl) {
+		Obj obj = Tab.currentScope().findSymbol(enumDecl.getName());
+		if(obj == null) {
+			report_info("Deklarisan niz " + enumDecl.getName(),enumDecl);
+			// TODO: enum type does not exist in tab
+//			Tab.insert(Obj., enumDecl.getName(), new Struct(Struct.Array, type.struct));
+		} else {
+			report_error("Promenljiva " + enumDecl.getName() + " je vec deklarisana" , enumDecl);
+		}
+	}
 
 	public void visit(Type type) {
 		Obj typeNode = Tab.find(type.getTypeName());
@@ -98,6 +137,9 @@ public class SemanticPass extends VisitorAdaptor {
 	}
 
 	public void visit(MethodTypeName methodTypeName) {
+		if(!methodTypeName.getName().equals("main")) {
+			report_error("Ime metode mora biti 'main' ", methodTypeName);
+		}
 		Obj currentMethod = Tab.insert(Obj.Meth, methodTypeName.getName(), Tab.noType);
 		methodTypeName.obj = currentMethod;
 		Tab.openScope();
@@ -112,7 +154,6 @@ public class SemanticPass extends VisitorAdaptor {
 	public void visit(PrintStmt printStmt){
 
 	}
-
 
 	public void visit(AddExpr addExpr) {
 		Struct te = addExpr.getExpr().struct;
@@ -130,23 +171,50 @@ public class SemanticPass extends VisitorAdaptor {
 		termExpr.struct = termExpr.getTerm().struct;
 	}
 
+	public void visit(LiteralFactor term) {
+		term.struct = term.getTypeLiteral().struct;
+	}
+
 	public void visit(FactorTerm term) {
 		term.struct = term.getFactor().struct;
 	}
 
 	public void visit(NumberLiteral cnst){
-//		cnst.struct = Tab.intType;
+		cnst.struct = Tab.intType;
 	}
 
-	public void visit(NameDesignator designator){
+	public void visit(CharLiteral cnst){
+		cnst.struct = Tab.charType;
+	}
+
+	@Override
+	public void visit(NameDesignator designator) {
 		Obj obj = Tab.find(designator.getName());
 		if (obj == Tab.noObj) {
 			report_error("Greska na liniji " + designator.getLine()+ " : ime "+designator.getName()+" nije deklarisano! ", null);
 		}
 		designator.obj = obj;
-		((DesignatorFactor)designator.getParent()).struct = obj.getType();
+		if(designator.getParent().getClass() == DesignatorFactor.class) {
+			((DesignatorFactor)designator.getParent()).struct = obj.getType();
+		}
 	}
-	
+
+	@Override
+	public void visit(ArrayFieldDesignator designator) {
+		String name = ((NameArrayDesignator) designator.getArrayDesignator()).getName();
+		Obj obj = Tab.find(name);
+		if (obj == Tab.noObj) {
+			report_error("Greska na liniji " + designator.getLine()+ " : ime "+name+" nije deklarisano! ", null);
+		}
+//		if (obj.getType().getKind() != Struct.Array) {
+//			report_error("Greska na liniji " + designator.getLine() + " : ime " + designator.getName() + " nije niz! ", null);
+//		}
+		designator.obj = obj;
+		if(designator.getParent().getClass() == DesignatorFactor.class) {
+			((DesignatorFactor)designator.getParent()).struct = designator.obj.getType().getElemType();
+		}
+	}
+
 	public boolean passed() {
 		return !errorDetected;
 	}

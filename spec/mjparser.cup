@@ -65,6 +65,7 @@ nonterminal MethodDeclList;
 nonterminal StatementList, Statement;
 nonterminal Addop, Mulop;
 nonterminal EnumFieldList, EnumField;
+nonterminal ArrayDesignator;
 
 nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName, Designator, MethodDecl, MethodTypeName, ConstDeclItem;
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Type, Term, Expr, Factor, TypeLiteral, SymbolDeclList;
@@ -127,7 +128,7 @@ Type ::= (Type) IDENT:typeName
 
 MethodDeclList ::= (MethodDeclarations) MethodDeclList MethodDecl
 				|
-				(NoMethodDeclarations)/* epsilon */
+				(MethodDeclaration) MethodDecl
 				;
 
 MethodDecl ::= (MethodDecl) MethodTypeName
@@ -175,19 +176,22 @@ Factor ::= (LiteralFactor) TypeLiteral
 		|
 		(BracketExprFactor) LPAREN Expr RPAREN
 		|
-		(AllocFactor) NEW Type
+		(AllocStructFactor) NEW Type
 		|
-		(AllocWithSizeFactor) NEW Type LBRACKET Expr RBRACKET
+		(AllocArrayFactor) NEW Type LBRACKET Expr RBRACKET
+		|
+		(EnumDesignator) IDENT:name POINT IDENT:field
 		|
 		(DesignatorFactor) Designator
 		;
 
 Designator ::= (NameDesignator) IDENT:name
 			|
-			(EnumDesignator) IDENT:name POINT IDENT:field
-			|
-			(ArrayDesignator) IDENT:name LBRACKET Expr RBRACKET
+			(ArrayFieldDesignator) ArrayDesignator LBRACKET Expr RBRACKET
 			;
+
+ArrayDesignator::= (NameArrayDesignator) IDENT:name
+				;
 
 Addop ::= (PlusAddop) PLUS
 		|

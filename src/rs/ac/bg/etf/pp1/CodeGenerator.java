@@ -2,6 +2,8 @@ package rs.ac.bg.etf.pp1;
 
 import rs.ac.bg.etf.pp1.ast.*;
 import rs.etf.pp1.mj.runtime.Code;
+import rs.etf.pp1.symboltable.Tab;
+import rs.etf.pp1.symboltable.concepts.Obj;
 
 public class CodeGenerator extends VisitorAdaptor {
 	
@@ -35,35 +37,52 @@ public class CodeGenerator extends VisitorAdaptor {
 	}
 
 	@Override
-	public void visit(AssignmentStmt Assignment) {
-//		Code.store(Assignment.getDesignator().obj);
+	public void visit(AssignmentStmt assignment) {
+		assignment.getExpr().traverseBottomUp(new ExprGenerator());
+		// vrednost izraza na esteku
+		Code.store(assignment.getDesignator().obj);
 	}
 
 	@Override
-	public void visit(ConstDecl constDecl) {
+	public void visit(DecrementStmt stmt) {
 	}
 
 	@Override
-	public void visit(NumberLiteral constant) {
-//		Code.load(new Obj(Obj.Con, "$", constant.struct, constant.getValue(), 0));
+	public void visit(IncrementStmt stmt) {
 	}
-	
+
 	@Override
-	public void visit(NameDesignator nameDesignator) {
-		SyntaxNode parent = nameDesignator.getParent();
-		if (AssignmentStmt.class != parent.getClass()) {
-			Code.load(nameDesignator.obj);
-		}
+	public void visit(ReadStmt readStmt) {
+		readStmt.getDesignator().traverseBottomUp(new VisitorAdaptor() {
+			@Override
+			public void visit(NameArrayDesignator designator) {
+				//NOTE: put array address on stack before ArrayFieldDesignator kicks in;
+				Code.load(((ArrayFieldDesignator)designator.getParent()).obj);
+			}
+			@Override
+			public void visit(ArrayFieldDesignator designator) {
+				//NOTE: Here we know that we want array field. Address is already here.
+				designator.obj = new Obj(Obj.Elem ,"$", designator.obj.getType().getElemType());
+				// i
+				designator.getExpr().traverseBottomUp(new ExprGenerator());
+			}
+		});
+		Code.put(Code.read); // vrednost zavrsila na expr stacku
+		// adr
+		Code.store(readStmt.getDesignator().obj);
 	}
 
 	@Override
 	public void visit(PrintStmt printStmt) {
+		printStmt.getExpr().traverseBottomUp(new ExprGenerator());
 		Code.put(Code.const_1);
 		Code.put(Code.print);
 	}
-	
+
 	@Override
-	public void visit(AddExpr addExpr) {
-		Code.put(Code.add);
+	public void visit(PrintStmtOptional printStmt) {
+		printStmt.getExpr().traverseBottomUp(new ExprGenerator());
+		Code.load(new Obj(Obj.Con, "$", Tab.intType, printStmt.getNumber(), 0));
+		Code.put(Code.print);
 	}
 }

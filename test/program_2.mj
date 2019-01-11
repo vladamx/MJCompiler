@@ -1,7 +1,11 @@
 program Adder
-const int x = 3, y = 5;
+const int y = 5, x = 3;
+int z;
+int br[];
 {
-    void main() {
-       print(x + y);
+    void main() const int x = 5; {
+       br = new int[1];
+       read(br[0]);
+       print(x + y + 156 + br[0]);
     }
 }
