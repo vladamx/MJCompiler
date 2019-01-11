@@ -5,8 +5,13 @@ int br[];
 {
     void main() const int x = 5; {
        br = new int[1];
+       z = 3;
+       z++;
+       print(z);
+       z--;
+       print(z);
        // read(br[0]);
        // print(10 - (x + y) + 156 + br[0] * 2);
-       print(-x + ((5 * 1 - 1) * 2 - (3 % 2 + 3 * 2 - 3) - 1 * 0) * 5 / 5);
+       // print(-x + ((5 * 1 - 1) * 2 - (3 % 2 + 3 * 2 - 3) - 1 * 0) * 5 / 5);
     }
 }

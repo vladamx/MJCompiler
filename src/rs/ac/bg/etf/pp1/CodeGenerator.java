@@ -45,10 +45,46 @@ public class CodeGenerator extends VisitorAdaptor {
 
 	@Override
 	public void visit(DecrementStmt stmt) {
+		stmt.getDesignator().traverseBottomUp(new VisitorAdaptor() {
+			@Override
+			public void visit(NameArrayDesignator designator) {
+				//NOTE: put array address on stack before ArrayFieldDesignator kicks in;
+				Code.load(((ArrayFieldDesignator)designator.getParent()).obj);
+			}
+			@Override
+			public void visit(ArrayFieldDesignator designator) {
+				//NOTE: Here we know that we want array field. Address is already here.
+				designator.obj = new Obj(Obj.Elem ,"$", designator.obj.getType().getElemType());
+				// i
+				designator.getExpr().traverseBottomUp(new ExprGenerator());
+			}
+		});
+		Code.load(stmt.getDesignator().obj);
+		Code.load(new Obj(Obj.Con, "$", Tab.intType, 1, 0));
+		Code.put(Code.sub);
+		Code.store(stmt.getDesignator().obj);
 	}
 
 	@Override
 	public void visit(IncrementStmt stmt) {
+		stmt.getDesignator().traverseBottomUp(new VisitorAdaptor() {
+			@Override
+			public void visit(NameArrayDesignator designator) {
+				//NOTE: put array address on stack before ArrayFieldDesignator kicks in;
+				Code.load(((ArrayFieldDesignator)designator.getParent()).obj);
+			}
+			@Override
+			public void visit(ArrayFieldDesignator designator) {
+				//NOTE: Here we know that we want array field. Address is already here.
+				designator.obj = new Obj(Obj.Elem ,"$", designator.obj.getType().getElemType());
+				// i
+				designator.getExpr().traverseBottomUp(new ExprGenerator());
+			}
+		});
+		Code.load(stmt.getDesignator().obj);
+		Code.load(new Obj(Obj.Con, "$", Tab.intType, 1, 0));
+		Code.put(Code.add);
+		Code.store(stmt.getDesignator().obj);
 	}
 
 	@Override

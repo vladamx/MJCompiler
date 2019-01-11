@@ -147,8 +147,22 @@ public class SemanticPass extends VisitorAdaptor {
 	}
 
 	public void visit(AssignmentStmt assignment) {
-//		if (!assignment.getExpr().struct.assignableTo(assignment.getDesignator().obj.getType()))
-//			report_error("Greska na liniji " + assignment.getLine() + " : " + " nekompatibilni tipovi u dodeli vrednosti ", null);
+		if (!assignment.getExpr().struct.assignableTo(assignment.getDesignator().obj.getType()))
+		report_error("Greska na liniji " + assignment.getLine() + " : " + " nekompatibilni tipovi u dodeli vrednosti ", null);
+	}
+
+	@Override
+	public void visit(IncrementStmt incrementStmt) {
+		if(incrementStmt.getDesignator().obj.getKind() == Obj.Con) {
+			report_error("Greska na liniji " + incrementStmt.getLine() + " : " + " nekompatibilni tipovi u dodeli vrednosti ", null);
+		}
+	}
+
+	@Override
+	public void visit(DecrementStmt decrementStmt) {;
+		if(decrementStmt.getDesignator().obj.getKind() == Obj.Con) {
+		report_error("Greska na liniji " + decrementStmt.getLine() + " : " + " nekompatibilni tipovi u dodeli vrednosti ", null);
+		}
 	}
 
 	public void visit(PrintStmt printStmt){
@@ -188,6 +202,12 @@ public class SemanticPass extends VisitorAdaptor {
 	@Override
 	public void visit(BracketExprFactor factor) {
 		factor.struct = factor.getExpr().struct;
+	}
+
+	@Override
+	public void visit(AllocArrayFactor factor) {
+		//TODO: ne znam da li je ovo ispravno?
+		factor.struct = new Struct(Struct.Array, Tab.intType);
 	}
 
 	@Override
