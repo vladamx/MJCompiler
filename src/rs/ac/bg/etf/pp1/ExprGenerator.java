@@ -9,6 +9,7 @@ public class ExprGenerator extends VisitorAdaptor {
     public void visit(NameDesignator nameDesignator) {
         Code.load(nameDesignator.obj);
     }
+
     public void visit(NumberLiteral constant) {
         Code.load(new Obj(Obj.Con, "$", constant.struct, constant.getValue(), 0));
     }
@@ -17,6 +18,18 @@ public class ExprGenerator extends VisitorAdaptor {
         int numericValue = (int)constant.getValue().charValue();
         Code.load(new Obj(Obj.Con, "$", constant.struct, numericValue, 0));
     }
+
+    @Override
+    public void visit(EnumDesignatorFactorItem factor) {
+        Obj found = null;
+        for(Obj obj :factor.obj.getLocalSymbols()) {
+            if(obj.getName().equals(factor.getField())) {
+                found = obj;
+            }
+        }
+        Code.load(found);
+    }
+
 
     @Override
     public void visit(BoolLiteral constant) {

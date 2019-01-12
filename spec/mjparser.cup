@@ -60,14 +60,14 @@ terminal Boolean BOOLEAN;
 terminal Character CHAR;
 terminal String IDENT;
 
-nonterminal SymbolDecl, VarDeclList, ConstDeclList, VarDeclItem;
+nonterminal SymbolDecl, VarDeclList, VarDecls,  ConstDeclList, VarDeclItem, VarDeclItems;
 nonterminal MethodDeclList;
 nonterminal StatementList, Statement;
 nonterminal Addop, Mulop;
 nonterminal EnumFieldList, EnumField;
 nonterminal ArrayDesignator;
 
-nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName, Designator, MethodDecl, MethodTypeName, ConstDeclItem;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName, Designator, MethodDecl, MethodTypeName, ConstDeclItem, EnumDeclItem, EnumDesignatorFactorItem;
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Type, Term, Expr, Factor, TypeLiteral, SymbolDeclList;
 
 Program ::= (Program) PROG ProgName:p  SymbolDeclList LBRACE MethodDeclList RBRACE
@@ -81,12 +81,23 @@ SymbolDeclList ::= (SymbolDeclarations) SymbolDeclList SymbolDecl
 				(NoSymbolDeclarations)/* epsilon */
 				;
 
-SymbolDecl ::= (VarDecl) Type VarDeclList SEMI
+SymbolDecl ::= (VarDecl) VarDeclItems
 			|
 			(ConstDecl) CONST Type ConstDeclList SEMI
 			|
-			(EnumDecl) ENUM IDENT:name LBRACE EnumFieldList RBRACE
+			(EnumDecl) EnumDeclItem
 			;
+
+VarDeclItems::= (VarDeclItems) Type VarDeclList SEMI
+			;
+
+VarDecls ::= (VarDeclarationItems) VarDecls VarDeclItems
+			|
+			(NoVarDeclarationItems)
+			;
+
+EnumDeclItem ::= (EnumDeclItem) ENUM IDENT:name LBRACE EnumFieldList RBRACE
+			  ;
 
 ConstDeclList ::= (ConstDeclarations) ConstDeclList COMMA ConstDeclItem
 			 |
@@ -132,7 +143,7 @@ MethodDeclList ::= (MethodDeclarations) MethodDeclList MethodDecl
 				;
 
 MethodDecl ::= (MethodDecl) MethodTypeName
-			   LPAREN RPAREN SymbolDeclList LBRACE StatementList RBRACE
+			   LPAREN RPAREN VarDecls LBRACE StatementList RBRACE
 			   ;
 
 MethodTypeName ::= (MethodTypeName) VOID:type IDENT:name
@@ -180,10 +191,13 @@ Factor ::= (LiteralFactor) TypeLiteral
 		|
 		(AllocArrayFactor) NEW Type LBRACKET Expr RBRACKET
 		|
-		(EnumDesignator) IDENT:name POINT IDENT:field
+		(EnumDesignatorFactor) EnumDesignatorFactorItem
 		|
 		(DesignatorFactor) Designator
 		;
+
+EnumDesignatorFactorItem ::= (EnumDesignatorFactorItem) IDENT:name POINT IDENT:field
+						;
 
 Designator ::= (NameDesignator) IDENT:name
 			|

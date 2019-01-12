@@ -4,9 +4,14 @@ int z;
 int br[];
 bool t;
 char slovo;
+enum Broj { JEDAN, DVA }
 char nizch[];
 {
-    void main() const int x = 5; {
+    void main()
+                Broj br;
+                int JEDAN, DVA;
+                char xy;
+        {
        //nizch = new char[3];
        //nizch[0] = 'a';
        //nizch[1] = 'b';
@@ -26,10 +31,14 @@ char nizch[];
       // read(br[0]);
       // print(10 - (x + y) + 156 + br[0] * 2);
       // print(-x + ((5 * 1 - 1) * 2 - (3 % 2 + 3 * 2 - 3) - 1 * 0) * 5 / 5);
-       print(t);
-       t = true;
-       print(t);
-       t = false;
-       print(t);
+      // print(t);
+      // t = true;
+      // print(t);
+      // t = false;
+      // print(t);
+         br = Broj.JEDAN;
+         print(br);
+         br = Broj.DVA;
+         print(br);
     }
 }

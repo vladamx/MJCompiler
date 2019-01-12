@@ -2,6 +2,7 @@ package rs.ac.bg.etf.pp1;
 import org.apache.log4j.Logger;
 import rs.ac.bg.etf.pp1.ast.*;
 import rs.ac.bg.etf.pp1.symboltable.Bool;
+import rs.ac.bg.etf.pp1.symboltable.Enum;
 import rs.etf.pp1.symboltable.Tab;
 import rs.etf.pp1.symboltable.concepts.Obj;
 import rs.etf.pp1.symboltable.concepts.Struct;
@@ -41,7 +42,7 @@ public class SemanticPass extends VisitorAdaptor {
 		Tab.openScope();     	
 	}
 
-	public void visit(VarDecl varDecl) {
+	public void visit(VarDeclItems varDecl) {
 		final Type type = varDecl.getType();
 		varDecl.traverseTopDown(new VisitorAdaptor() {
 			@Override
@@ -99,16 +100,35 @@ public class SemanticPass extends VisitorAdaptor {
 	}
 
 	@Override
-	public void visit(EnumDecl enumDecl) {
-		// Todo: en
+	public void visit(EnumDeclItem enumDecl) {
+		// We first check if we already have enum decl in the same scope
 		Obj obj = Tab.currentScope().findSymbol(enumDecl.getName());
 		if(obj == null) {
-			report_info("Deklarisan niz " + enumDecl.getName(),enumDecl);
-			// TODO: enum type does not exist in tab
-//			Tab.insert(Obj., enumDecl.getName(), new Struct(Struct.Array, type.struct));
+			report_info("Deklarisan enum " + enumDecl.getName(),enumDecl);
+			enumDecl.obj = Tab.insert(Obj.Type, enumDecl.getName(), Enum.struct);
 		} else {
-			report_error("Promenljiva " + enumDecl.getName() + " je vec deklarisana" , enumDecl);
+			report_error("Enum " + enumDecl.getName() + " je vec deklarisan" , enumDecl);
 		}
+		Tab.openScope();
+		enumDecl.getEnumFieldList().traverseBottomUp(new VisitorAdaptor() {
+			private int value = 0;
+			@Override
+			public void visit(EnumFieldWithInit field) {
+				report_info("Deklarisano enum polje " + enumDecl.getName() + " sa inicijalizacijom",enumDecl);
+				Obj insert = Tab.insert(Obj.Con, field.getName(), Tab.intType);
+				Integer fieldValue = field.getN1();
+				insert.setAdr(fieldValue);
+				value = fieldValue;
+			}
+			@Override
+			public void visit(EnumFieldWithoutInit field) {
+				report_info("Deklarisano enum polje " + enumDecl.getName(),enumDecl);
+				Obj insert = Tab.insert(Obj.Con, field.getName(), Tab.intType);
+				insert.setAdr(value++);
+			}
+		});
+		Tab.chainLocalSymbols(enumDecl.obj);
+		Tab.closeScope();
 	}
 
 	public void visit(Type type) {
@@ -212,6 +232,18 @@ public class SemanticPass extends VisitorAdaptor {
 	}
 
 	@Override
+	public void visit(EnumDesignatorFactor factor) {
+		factor.struct = factor.getEnumDesignatorFactorItem().obj.getType();
+	}
+
+	@Override
+	public void visit(EnumDesignatorFactorItem factor) {
+		Obj obj = Tab.find(factor.getName());
+		factor.obj = obj;
+	}
+
+
+	@Override
 	public void visit(AllocArrayFactor factor) {
 		//TODO: ne znam da li je ovo ispravno?
 		factor.struct = new Struct(Struct.Array, factor.getType().struct);
@@ -243,7 +275,7 @@ public class SemanticPass extends VisitorAdaptor {
 
 	@Override
 	public void visit(NameDesignator designator) {
-		Obj obj = Tab.find(designator.getName());
+		Obj obj = Tab.currentScope().findSymbol(designator.getName());
 		if (obj == Tab.noObj) {
 			report_error("Greska na liniji " + designator.getLine()+ " : ime "+designator.getName()+" nije deklarisano! ", null);
 		}
@@ -256,7 +288,7 @@ public class SemanticPass extends VisitorAdaptor {
 	@Override
 	public void visit(ArrayFieldDesignator designator) {
 		String name = ((NameArrayDesignator) designator.getArrayDesignator()).getName();
-		Obj obj = Tab.find(name);
+		Obj obj = Tab.currentScope().findSymbol(name);
 		if (obj == Tab.noObj) {
 			report_error("Greska na liniji " + designator.getLine()+ " : ime "+name+" nije deklarisano! ", null);
 		}
