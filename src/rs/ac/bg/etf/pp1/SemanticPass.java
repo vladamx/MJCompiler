@@ -3,6 +3,7 @@ import org.apache.log4j.Logger;
 import rs.ac.bg.etf.pp1.ast.*;
 import rs.ac.bg.etf.pp1.symboltable.Bool;
 import rs.ac.bg.etf.pp1.symboltable.Enum;
+import rs.ac.bg.etf.pp1.symboltable.EnumStruct;
 import rs.etf.pp1.symboltable.Tab;
 import rs.etf.pp1.symboltable.concepts.Obj;
 import rs.etf.pp1.symboltable.concepts.Struct;
@@ -43,14 +44,14 @@ public class SemanticPass extends VisitorAdaptor {
 	}
 
 	public void visit(VarDeclItems varDecl) {
-		final Type type = varDecl.getType();
+		final Struct struct = varDecl.getType().struct.getClass() == EnumStruct.class ? Tab.intType : varDecl.getType().struct;
 		varDecl.traverseTopDown(new VisitorAdaptor() {
 			@Override
 			public void visit(SimpleVarDeclItem varDeclItem) {
 				Obj obj = Tab.currentScope().findSymbol(varDeclItem.getVarName());
 				if(obj == null) {
 					report_info("Deklarisana promenljiva " + varDeclItem.getVarName(), varDeclItem);
-					Tab.insert(Obj.Var, varDeclItem.getVarName(), type.struct);
+					Tab.insert(Obj.Var, varDeclItem.getVarName(), struct);
 				} else {
 					report_error("Promenljiva " + varDeclItem.getVarName() + " je vec deklarisana" , varDeclItem);
 				}
@@ -60,7 +61,7 @@ public class SemanticPass extends VisitorAdaptor {
 				Obj obj = Tab.currentScope().findSymbol(varDeclItem.getVarName());
 				if(obj == null) {
 					report_info("Deklarisan niz " + varDeclItem.getVarName(),varDeclItem);
-					Tab.insert(Obj.Var, varDeclItem.getVarName(), new Struct(Struct.Array, type.struct));
+					Tab.insert(Obj.Var, varDeclItem.getVarName(), new Struct(Struct.Array, struct));
 				} else {
 					report_error("Promenljiva " + varDeclItem.getVarName() + " je vec deklarisana" , varDeclItem);
 				}
@@ -233,7 +234,7 @@ public class SemanticPass extends VisitorAdaptor {
 
 	@Override
 	public void visit(EnumDesignatorFactor factor) {
-		factor.struct = factor.getEnumDesignatorFactorItem().obj.getType();
+		factor.struct = factor.getEnumDesignatorFactorItem().obj.getType().getElemType();
 	}
 
 	@Override
@@ -275,20 +276,26 @@ public class SemanticPass extends VisitorAdaptor {
 
 	@Override
 	public void visit(NameDesignator designator) {
-		Obj obj = Tab.currentScope().findSymbol(designator.getName());
+		Obj obj = Tab.find(designator.getName());
 		if (obj == Tab.noObj) {
 			report_error("Greska na liniji " + designator.getLine()+ " : ime "+designator.getName()+" nije deklarisano! ", null);
 		}
 		designator.obj = obj;
+		// Check what is the context of the name designator - this is not clean code, but works.
 		if(designator.getParent().getClass() == DesignatorFactor.class) {
-			((DesignatorFactor)designator.getParent()).struct = obj.getType();
+			if(designator.obj.getType().getClass() == EnumStruct.class) {
+				((DesignatorFactor)designator.getParent()).struct = obj.getType().getElemType();
+			} else {
+				((DesignatorFactor) designator.getParent()).struct = obj.getType();
+			}
 		}
+
 	}
 
 	@Override
 	public void visit(ArrayFieldDesignator designator) {
 		String name = ((NameArrayDesignator) designator.getArrayDesignator()).getName();
-		Obj obj = Tab.currentScope().findSymbol(name);
+		Obj obj = Tab.find(name);
 		if (obj == Tab.noObj) {
 			report_error("Greska na liniji " + designator.getLine()+ " : ime "+name+" nije deklarisano! ", null);
 		}

@@ -19,7 +19,7 @@ public class MJTest {
 		Reader br = null;
 		try {
 			
-			File sourceCode = new File("test/program_2.mj");
+			File sourceCode = new File("test/test_A.mj");
 			log.info("Compiling source file: " + sourceCode.getAbsolutePath());
 			
 			br = new BufferedReader(new FileReader(sourceCode));

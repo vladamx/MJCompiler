@@ -17,7 +17,6 @@ program test301
 	{
 		nula = Broj.NULA;
 		jedan = Broj.JEDAN;
-
 		bodovi = 0;
 		bodovi++;
 		bodovi = bodovi + jedan;
