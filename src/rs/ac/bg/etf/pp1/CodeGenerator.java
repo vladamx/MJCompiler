@@ -38,8 +38,24 @@ public class CodeGenerator extends VisitorAdaptor {
 
 	@Override
 	public void visit(AssignmentStmt assignment) {
-		assignment.getExpr().traverseBottomUp(new ExprGenerator());
 		// vrednost izraza na esteku
+		if(assignment.getDesignator().getClass() == ArrayFieldDesignator.class) {
+			assignment.getDesignator().traverseBottomUp(new VisitorAdaptor() {
+				@Override
+				public void visit(NameArrayDesignator designator) {
+					//NOTE: put array address on stack before ArrayFieldDesignator kicks in;
+					Code.load(((ArrayFieldDesignator)designator.getParent()).obj);
+				}
+				@Override
+				public void visit(ArrayFieldDesignator designator) {
+					//NOTE: Here we know that we want array field. Address is already here.
+					designator.obj = new Obj(Obj.Elem ,"$", designator.obj.getType().getElemType());
+					// i
+					designator.getExpr().traverseBottomUp(new ExprGenerator());
+				}
+			});
+		}
+		assignment.getExpr().traverseBottomUp(new ExprGenerator());
 		Code.store(assignment.getDesignator().obj);
 	}
 
@@ -103,7 +119,12 @@ public class CodeGenerator extends VisitorAdaptor {
 				designator.getExpr().traverseBottomUp(new ExprGenerator());
 			}
 		});
-		Code.put(Code.read); // vrednost zavrsila na expr stacku
+		// vrednost zavrsila na expr stacku
+		if(readStmt.getDesignator().obj.getType() == Tab.charType) {
+			Code.put(Code.bread);
+		} else {
+			Code.put(Code.read);
+		}
 		// adr
 		Code.store(readStmt.getDesignator().obj);
 	}
@@ -112,13 +133,21 @@ public class CodeGenerator extends VisitorAdaptor {
 	public void visit(PrintStmt printStmt) {
 		printStmt.getExpr().traverseBottomUp(new ExprGenerator());
 		Code.put(Code.const_1);
-		Code.put(Code.print);
+		if(printStmt.getExpr().struct == Tab.charType) {
+			Code.put(Code.bprint);
+		} else {
+			Code.put(Code.print);
+		}
 	}
 
 	@Override
 	public void visit(PrintStmtOptional printStmt) {
 		printStmt.getExpr().traverseBottomUp(new ExprGenerator());
 		Code.load(new Obj(Obj.Con, "$", Tab.intType, printStmt.getNumber(), 0));
-		Code.put(Code.print);
+		if(printStmt.getExpr().struct == Tab.charType) {
+			Code.put(Code.bprint);
+		} else {
+			Code.put(Code.print);
+		}
 	}
 }

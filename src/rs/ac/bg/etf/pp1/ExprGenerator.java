@@ -13,6 +13,18 @@ public class ExprGenerator extends VisitorAdaptor {
         Code.load(new Obj(Obj.Con, "$", constant.struct, constant.getValue(), 0));
     }
     @Override
+    public void visit(CharLiteral constant) {
+        int numericValue = (int)constant.getValue().charValue();
+        Code.load(new Obj(Obj.Con, "$", constant.struct, numericValue, 0));
+    }
+
+    @Override
+    public void visit(BoolLiteral constant) {
+        int numericValue = constant.getValue().compareTo(true) == 0 ? 1 : 0;
+        Code.load(new Obj(Obj.Con, "$", constant.struct, numericValue, 0));
+    }
+
+    @Override
     public void visit(AddExpr addExpr) {
         if(addExpr.getAddop().getClass() == PlusAddop.class) {
             Code.put(Code.add);

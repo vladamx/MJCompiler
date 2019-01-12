@@ -4,9 +4,12 @@ import java_cup.runtime.Symbol;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 import rs.ac.bg.etf.pp1.ast.Program;
+import rs.ac.bg.etf.pp1.symboltable.Bool;
+import rs.ac.bg.etf.pp1.symboltable.Enum;
 import rs.ac.bg.etf.pp1.util.Log4JUtils;
 import rs.etf.pp1.mj.runtime.Code;
 import rs.etf.pp1.symboltable.Tab;
+import rs.etf.pp1.symboltable.concepts.Obj;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -47,6 +50,8 @@ public class MJParserTest {
 			System.out.println("======================================================");
 
 			Tab.init(); // Universe scope
+			Tab.insert(Obj.Type, "bool", Bool.struct);
+			Tab.insert(Obj.Type, "enum", Enum.struct);
 			SemanticPass semanticCheck = new SemanticPass();
 			prog.traverseBottomUp(semanticCheck);
 	        Tab.dump();

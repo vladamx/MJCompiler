@@ -1,6 +1,7 @@
 package rs.ac.bg.etf.pp1;
 import org.apache.log4j.Logger;
 import rs.ac.bg.etf.pp1.ast.*;
+import rs.ac.bg.etf.pp1.symboltable.Bool;
 import rs.etf.pp1.symboltable.Tab;
 import rs.etf.pp1.symboltable.concepts.Obj;
 import rs.etf.pp1.symboltable.concepts.Struct;
@@ -98,12 +99,8 @@ public class SemanticPass extends VisitorAdaptor {
 	}
 
 	@Override
-	public void visit(BoolLiteral boolLiteral) {
-			// TODO: Bool type does not exist in tab
-	}
-
-	@Override
 	public void visit(EnumDecl enumDecl) {
+		// Todo: en
 		Obj obj = Tab.currentScope().findSymbol(enumDecl.getName());
 		if(obj == null) {
 			report_info("Deklarisan niz " + enumDecl.getName(),enumDecl);
@@ -147,7 +144,13 @@ public class SemanticPass extends VisitorAdaptor {
 	}
 
 	public void visit(AssignmentStmt assignment) {
-		if (!assignment.getExpr().struct.assignableTo(assignment.getDesignator().obj.getType()))
+		Designator designator = assignment.getDesignator();
+		Struct targetType = designator.obj.getType();
+		if(designator.getClass() == ArrayFieldDesignator.class) {
+			targetType = designator.obj.getType().getElemType();
+		}
+
+		if (!assignment.getExpr().struct.assignableTo(targetType))
 		report_error("Greska na liniji " + assignment.getLine() + " : " + " nekompatibilni tipovi u dodeli vrednosti ", null);
 	}
 
@@ -182,8 +185,12 @@ public class SemanticPass extends VisitorAdaptor {
 	public void visit(AddExpr addExpr) {
 		Struct te = addExpr.getExpr().struct;
 		Struct t = addExpr.getTerm().struct;
-		if (te.equals(t) && te == Tab.intType) {
-			addExpr.struct = te;
+		if (te.equals(t)) {
+			if(te == Tab.intType) {
+				addExpr.struct = te;
+			} else {
+				report_error("Greska na liniji "+ addExpr.getLine()+" : moguce je sabirati samo int tipove.", null);
+			}
 		}
 		else {
 			report_error("Greska na liniji "+ addExpr.getLine()+" : nekompatibilni tipovi u izrazu za sabiranje.", null);
@@ -207,7 +214,7 @@ public class SemanticPass extends VisitorAdaptor {
 	@Override
 	public void visit(AllocArrayFactor factor) {
 		//TODO: ne znam da li je ovo ispravno?
-		factor.struct = new Struct(Struct.Array, Tab.intType);
+		factor.struct = new Struct(Struct.Array, factor.getType().struct);
 	}
 
 	@Override
@@ -228,6 +235,10 @@ public class SemanticPass extends VisitorAdaptor {
 
 	public void visit(CharLiteral cnst){
 		cnst.struct = Tab.charType;
+	}
+
+	public void visit(BoolLiteral cnst){
+		cnst.struct = Bool.struct;
 	}
 
 	@Override
