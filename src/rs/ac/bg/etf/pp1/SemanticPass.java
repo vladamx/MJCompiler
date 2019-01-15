@@ -43,7 +43,7 @@ public class SemanticPass extends VisitorAdaptor {
 		Tab.openScope();     	
 	}
 
-	public void visit(VarDeclItems varDecl) {
+	public void visit(NoErrVarDeclItems varDecl) {
 		final Struct struct = varDecl.getType().struct.getClass() == EnumStruct.class ? Tab.intType : varDecl.getType().struct;
 		varDecl.traverseTopDown(new VisitorAdaptor() {
 			@Override
@@ -116,6 +116,11 @@ public class SemanticPass extends VisitorAdaptor {
 			@Override
 			public void visit(EnumFieldWithInit field) {
 				report_info("Deklarisano enum polje " + enumDecl.getName() + " sa inicijalizacijom",enumDecl);
+				for (Obj obj : Tab.currentScope().values()) {
+					if (obj.getAdr() == field.getN1()) {
+						report_error("Polje " + obj.getName() + " je incijalizovano na istu vrednost kao polje " + field.getName(), enumDecl);
+					}
+				}
 				Obj insert = Tab.insert(Obj.Con, field.getName(), Tab.intType);
 				Integer fieldValue = field.getN1();
 				insert.setAdr(fieldValue);
@@ -170,6 +175,9 @@ public class SemanticPass extends VisitorAdaptor {
 		if(designator.getClass() == ArrayFieldDesignator.class) {
 			targetType = designator.obj.getType().getElemType();
 		}
+		if(assignment.getDesignator().obj.getKind() == Obj.Con) {
+			report_error("Greska na liniji " + assignment.getLine() + " : " + " konstanta ne moze biti na levoj strani dodele.", null);
+		}
 
 		if (!assignment.getExpr().struct.assignableTo(targetType))
 		report_error("Greska na liniji " + assignment.getLine() + " : " + " nekompatibilni tipovi u dodeli vrednosti ", null);
@@ -180,6 +188,9 @@ public class SemanticPass extends VisitorAdaptor {
 		if(incrementStmt.getDesignator().obj.getKind() == Obj.Con) {
 			report_error("Greska na liniji " + incrementStmt.getLine() + " : " + " nekompatibilni tipovi u dodeli vrednosti ", null);
 		}
+		if(incrementStmt.getDesignator().obj.getType() != Tab.intType) {
+			report_error("Greska na liniji " + incrementStmt.getLine() + " : " + " designator nije int tipa.", null);
+		}
 	}
 
 	@Override
@@ -187,15 +198,26 @@ public class SemanticPass extends VisitorAdaptor {
 		if(decrementStmt.getDesignator().obj.getKind() == Obj.Con) {
 		report_error("Greska na liniji " + decrementStmt.getLine() + " : " + " nekompatibilni tipovi u dodeli vrednosti ", null);
 		}
+		if(decrementStmt.getDesignator().obj.getType() != Tab.intType) {
+			report_error("Greska na liniji " + decrementStmt.getLine() + " : " + " designator nije int tipa.", null);
+		}
 	}
 
 	public void visit(PrintStmt printStmt){
 
 	}
-    public void visit(MulExprTerm expr) {
+
+	@Override
+	public void visit(ReadStmt readStmt) {
+		if(readStmt.getDesignator().obj.getKind() == Obj.Con) {
+			report_error("Greska na liniji " + readStmt.getLine() + " : " + " konstanta ne moze biti parametar read naredbi.", null);
+		}
+	}
+
+	public void visit(MulExprTerm expr) {
         Struct te = expr.getTerm().struct;
         Struct t = expr.getFactor().struct;
-        if (te.equals(t) && te == Tab.intType) {
+        if (te != null && te.equals(t) && te == Tab.intType) {
             expr.struct = te;
         }
         else {
@@ -246,6 +268,9 @@ public class SemanticPass extends VisitorAdaptor {
 
 	@Override
 	public void visit(AllocArrayFactor factor) {
+		if(factor.getExpr().struct != Tab.intType) {
+			report_error("Greska na liniji "+ factor.getLine()+" : izraz mora biti tipa int.", null);
+		}
 		//TODO: ne znam da li je ovo ispravno?
 		factor.struct = new Struct(Struct.Array, factor.getType().struct);
 	}
@@ -257,6 +282,8 @@ public class SemanticPass extends VisitorAdaptor {
 		}
 		negTermExpr.struct = negTermExpr.getTerm().struct;
 	}
+
+
 
 	public void visit(FactorTerm term) {
 		term.struct = term.getFactor().struct;
@@ -292,25 +319,34 @@ public class SemanticPass extends VisitorAdaptor {
 
 	}
 
+
 	@Override
 	public void visit(ArrayFieldDesignator designator) {
 		String name = ((NameArrayDesignator) designator.getArrayDesignator()).getName();
 		Obj obj = Tab.find(name);
 		if (obj == Tab.noObj) {
 			report_error("Greska na liniji " + designator.getLine()+ " : ime "+name+" nije deklarisano! ", null);
-		}
-//		if (obj.getType().getKind() != Struct.Array) {
-//			report_error("Greska na liniji " + designator.getLine() + " : ime " + designator.getName() + " nije niz! ", null);
-//		}
-		designator.obj = obj;
-		if(designator.getParent().getClass() == DesignatorFactor.class) {
-			((DesignatorFactor)designator.getParent()).struct = designator.obj.getType().getElemType();
+		} else {
+ 			if (obj.getType().getKind() != Struct.Array) {
+				report_error("Greska na liniji " + designator.getLine() + " : ime " + ((NameArrayDesignator) designator.getArrayDesignator()).getName() + " nije niz! ", null);
+			}
+			if (designator.getExpr().struct != Tab.intType) {
+				report_error("Greska na liniji " + designator.getLine() + " izraz mora biti tipa int.", null);
+			}
+			designator.obj = obj;
+			if (designator.getParent().getClass() == DesignatorFactor.class) {
+				((DesignatorFactor) designator.getParent()).struct = designator.obj.getType().getElemType();
+			}
 		}
 	}
+
 
 	public boolean passed() {
 		return !errorDetected;
 	}
-	
+
+	public int getVarCount() {
+		return nVars;
+	}
 }
 

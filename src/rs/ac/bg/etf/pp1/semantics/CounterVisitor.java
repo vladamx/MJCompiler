@@ -1,4 +1,4 @@
-package rs.ac.bg.etf.pp1;
+package rs.ac.bg.etf.pp1.semantics;
 
 import rs.ac.bg.etf.pp1.ast.SymbolDecl;
 import rs.ac.bg.etf.pp1.ast.VisitorAdaptor;

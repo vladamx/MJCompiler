@@ -66,6 +66,7 @@ nonterminal StatementList, Statement;
 nonterminal Addop, Mulop;
 nonterminal EnumFieldList, EnumField;
 nonterminal ArrayDesignator;
+nonterminal ErrorNonTerm;
 
 nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName, Designator, MethodDecl, MethodTypeName, ConstDeclItem, EnumDeclItem, EnumDesignatorFactorItem;
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Type, Term, Expr, Factor, TypeLiteral, SymbolDeclList;
@@ -88,7 +89,12 @@ SymbolDecl ::= (VarDecl) VarDeclItems
 			(EnumDecl) EnumDeclItem
 			;
 
-VarDeclItems::= (VarDeclItems) Type VarDeclList SEMI
+ErrorNonTerm ::= (ErrorNonTerm) error
+				{: parser.log.debug("Uspesan oporavak od greske pri deklaraciji promenljive."); :};
+
+VarDeclItems::= (NoErrVarDeclItems) Type VarDeclList SEMI
+			|
+			(ErrVarDeclItems) ErrorNonTerm SEMI
 			;
 
 VarDecls ::= (VarDeclarationItems) VarDecls VarDeclItems
@@ -115,6 +121,9 @@ VarDeclList ::= (VarDeclarations)  VarDeclList COMMA VarDeclItem
 VarDeclItem ::=  (SimpleVarDeclItem) IDENT:varName
 		  |
 		  (ArrayVarDeclItem) IDENT:varName LBRACKET RBRACKET
+		  |
+		  (Err1VarDeclItem) error
+		  {: parser.log.debug("Uspesan oporavak od greske pri deklaraciji promenljive."); :}
 		  ;
 
 TypeLiteral ::= (NumberLiteral) NUMBER:value
