@@ -44,7 +44,7 @@ public class SemanticPass extends VisitorAdaptor {
 	}
 
 	public void visit(NoErrVarDeclItems varDecl) {
-		final Struct struct = varDecl.getType().struct.getClass() == EnumStruct.class ? Tab.intType : varDecl.getType().struct;
+		final Struct struct = varDecl.getType().struct;
 		varDecl.traverseTopDown(new VisitorAdaptor() {
 			@Override
 			public void visit(SimpleVarDeclItem varDeclItem) {
@@ -217,8 +217,12 @@ public class SemanticPass extends VisitorAdaptor {
 	public void visit(MulExprTerm expr) {
         Struct te = expr.getTerm().struct;
         Struct t = expr.getFactor().struct;
-        if (te != null && te.equals(t) && te == Tab.intType) {
-            expr.struct = te;
+        if (te != null && (te.equals(t) || (te == Enum.struct && t == Tab.intType ))) {
+			if(te == Tab.intType || te == Enum.struct) {
+				expr.struct = Tab.intType;
+			} else {
+				report_error("Greska na liniji "+ expr.getLine()+" : moguce je mnoziti samo int tipove.", null);
+			}
         }
         else {
             report_error("Greska na liniji "+ expr.getLine()+" : nekompatibilni tipovi u izrazu za mnozenje.", null);
@@ -228,9 +232,9 @@ public class SemanticPass extends VisitorAdaptor {
 	public void visit(AddExpr addExpr) {
 		Struct te = addExpr.getExpr().struct;
 		Struct t = addExpr.getTerm().struct;
-		if (te.equals(t)) {
-			if(te == Tab.intType) {
-				addExpr.struct = te;
+		if (te != null && (te.equals(t) || (te == Enum.struct && t == Tab.intType ))) {
+			if(te == Tab.intType || te == Enum.struct) {
+				addExpr.struct = Tab.intType;
 			} else {
 				report_error("Greska na liniji "+ addExpr.getLine()+" : moguce je sabirati samo int tipove.", null);
 			}
@@ -256,7 +260,7 @@ public class SemanticPass extends VisitorAdaptor {
 
 	@Override
 	public void visit(EnumDesignatorFactor factor) {
-		factor.struct = factor.getEnumDesignatorFactorItem().obj.getType().getElemType();
+		factor.struct = factor.getEnumDesignatorFactorItem().obj.getType();
 	}
 
 	@Override
@@ -330,8 +334,8 @@ public class SemanticPass extends VisitorAdaptor {
  			if (obj.getType().getKind() != Struct.Array) {
 				report_error("Greska na liniji " + designator.getLine() + " : ime " + ((NameArrayDesignator) designator.getArrayDesignator()).getName() + " nije niz! ", null);
 			}
-			if (designator.getExpr().struct != Tab.intType) {
-				report_error("Greska na liniji " + designator.getLine() + " izraz mora biti tipa int.", null);
+			if (designator.getExpr().struct != Tab.intType && designator.getExpr().struct != Enum.struct) {
+				report_error("Greska na liniji " + designator.getLine() + " : izraz mora biti tipa int.", null);
 			}
 			designator.obj = obj;
 			if (designator.getParent().getClass() == DesignatorFactor.class) {

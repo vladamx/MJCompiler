@@ -12,4 +12,23 @@ public class EnumStruct extends Struct {
     public Struct getElemType() {
         return Tab.intType;
     }
+
+    @Override
+    public boolean assignableTo(Struct dest) {
+        if(dest == Tab.intType || dest.getKind() == 6) {
+            return  true;
+        } else {
+            return  false;
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        Struct struct = (Struct) o;
+        if(struct == Tab.intType || struct.getKind() == 6) {
+            return true;
+        } else {
+            return  false;
+        }
+    }
 }

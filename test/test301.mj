@@ -9,7 +9,7 @@ program test301
 	int niz[];
 	bool laso;
 	char nizch[];
-	
+
 {
 	void main()
 		int bodovi;
@@ -42,8 +42,8 @@ program test301
 		
 		bodovi = bodovi + ((pet * jedan - 1) * 2 - (3 % 2 + 3 * 2 - 3) - Broj.JEDAN * 0); 
 		print(bodovi);
-			
-			
+
+
 		read(bodovi);
 		bodovi = bodovi + 1;
 		print(bodovi);
