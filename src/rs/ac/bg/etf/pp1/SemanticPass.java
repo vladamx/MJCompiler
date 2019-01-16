@@ -221,7 +221,7 @@ public class SemanticPass extends VisitorAdaptor {
 			if(te == Tab.intType || te == Enum.struct) {
 				expr.struct = Tab.intType;
 			} else {
-				report_error("Greska na liniji "+ expr.getLine()+" : moguce je mnoziti samo int tipove.", null);
+				report_error("Greska na liniji "+ expr.getLine()+" : moguce je mnoziti samo int kompatibilne tipove.", null);
 			}
         }
         else {
@@ -236,7 +236,7 @@ public class SemanticPass extends VisitorAdaptor {
 			if(te == Tab.intType || te == Enum.struct) {
 				addExpr.struct = Tab.intType;
 			} else {
-				report_error("Greska na liniji "+ addExpr.getLine()+" : moguce je sabirati samo int tipove.", null);
+				report_error("Greska na liniji "+ addExpr.getLine()+" : moguce je sabirati samo int kompatibilne tipove.", null);
 			}
 		}
 		else {
@@ -335,7 +335,7 @@ public class SemanticPass extends VisitorAdaptor {
 				report_error("Greska na liniji " + designator.getLine() + " : ime " + ((NameArrayDesignator) designator.getArrayDesignator()).getName() + " nije niz! ", null);
 			}
 			if (designator.getExpr().struct != Tab.intType && designator.getExpr().struct != Enum.struct) {
-				report_error("Greska na liniji " + designator.getLine() + " : izraz mora biti tipa int.", null);
+				report_error("Greska na liniji " + designator.getLine() + " : izraz mora biti tipa int kompatibilan.", null);
 			}
 			designator.obj = obj;
 			if (designator.getParent().getClass() == DesignatorFactor.class) {
