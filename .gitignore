@@ -12,4 +12,5 @@ src/rs/ac/bg/etf/pp1/Yylex.java~
 .idea
 out
 **/*.svg
+**/*.pdf
 /syntaxtree.svg

@@ -1,0 +1,27 @@
+Compiler
+
+rs.ac.bg.etf.pp1.Compiler
+test\test301.mj test\program.obj
+
+Disasm
+
+rs.etf.pp1.mj.runtime.disasm
+test\program.obj
+
+LexerGenerator
+
+JFlex.Main
+-d src\rs\ac\bg\etf\pp1 spec\mjlexer.flex
+
+Run
+
+rs.etf.pp1.mj.runtime.Run
+-debug test\program.obj
+
+ParserGenerator
+
+java_cup.Main
+-destdir rs\ac\bg\etf\pp1 -dump_states -parser MJParser -ast rs.ac.bg.etf.pp1.ast -buildtree ..\spec\mjparser.cup
+
+WorkingDir
+workspace\MJCompiler\src
