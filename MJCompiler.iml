@@ -23,11 +23,11 @@
       <sourceFolder url="file://$MODULE_DIR$/config" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="zcup_v10k" level="project" />
+    <orderEntry type="inheritedJdk" />
     <orderEntry type="module-library">
-      <library name="JFlex.jar">
+      <library name="mj-runtime.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/JFlex.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/mj-runtime.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -42,20 +42,20 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="zcup_v10k" level="project" />
     <orderEntry type="module-library">
-      <library name="symboltable.jar">
+      <library name="JFlex.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/symboltable.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/JFlex.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="inheritedJdk" />
     <orderEntry type="module-library">
-      <library name="mj-runtime.jar">
+      <library name="symboltable.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/mj-runtime.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/symboltable.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

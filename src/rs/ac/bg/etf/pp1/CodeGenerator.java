@@ -8,20 +8,20 @@ import rs.etf.pp1.symboltable.Tab;
 import rs.etf.pp1.symboltable.concepts.Obj;
 
 public class CodeGenerator extends VisitorAdaptor {
-	
+
 	private int mainPc;
 
 	public int getMainPc() {
 		return mainPc;
 	}
-	
+
 	@Override
 	public void visit(MethodTypeName methodTypeName) {
 		if ("main".equalsIgnoreCase(methodTypeName.getName())) {
 			mainPc = Code.pc;
 		}
 		methodTypeName.obj.setAdr(Code.pc);
-		
+
 		SyntaxNode methodNode = methodTypeName.getParent();
 		CounterVisitor.VarCounter varCounter = new CounterVisitor.VarCounter();
 		methodNode.traverseTopDown(varCounter);
@@ -30,7 +30,7 @@ public class CodeGenerator extends VisitorAdaptor {
 		Code.put(0);
 		Code.put(varCounter.getCount());
 	}
-	
+
 
 	@Override
 	public void visit(MethodDecl MethodDecl) {
@@ -53,11 +53,11 @@ public class CodeGenerator extends VisitorAdaptor {
 					//NOTE: Here we know that we want array field. Address is already here.
 					designator.obj = new Obj(Obj.Elem ,"$", designator.obj.getType().getElemType());
 					// i
-					designator.getExpr().traverseBottomUp(new ExprGenerator());
+					designator.getExpr1().traverseBottomUp(new ExprGenerator());
 				}
 			});
 		}
-		assignment.getExpr().traverseBottomUp(new ExprGenerator());
+		assignment.getExpr1().traverseBottomUp(new ExprGenerator());
 		Code.store(assignment.getDesignator().obj);
 	}
 
@@ -74,7 +74,7 @@ public class CodeGenerator extends VisitorAdaptor {
 				//NOTE: Here we know that we want array field. Address is already here.
 				designator.obj = new Obj(Obj.Elem ,"$", designator.obj.getType().getElemType());
 				// i
-				designator.getExpr().traverseBottomUp(new ExprGenerator());
+				designator.getExpr1().traverseBottomUp(new ExprGenerator());
 			}
 		});
 		Code.load(stmt.getDesignator().obj);
@@ -96,7 +96,7 @@ public class CodeGenerator extends VisitorAdaptor {
 				//NOTE: Here we know that we want array field. Address is already here.
 				designator.obj = new Obj(Obj.Elem ,"$", designator.obj.getType().getElemType());
 				// i
-				designator.getExpr().traverseBottomUp(new ExprGenerator());
+				designator.getExpr1().traverseBottomUp(new ExprGenerator());
 			}
 		});
 		Code.load(stmt.getDesignator().obj);
@@ -118,7 +118,7 @@ public class CodeGenerator extends VisitorAdaptor {
 				//NOTE: Here we know that we want array field. Address is already here.
 				designator.obj = new Obj(Obj.Elem ,"$", designator.obj.getType().getElemType());
 				// i
-				designator.getExpr().traverseBottomUp(new ExprGenerator());
+				designator.getExpr1().traverseBottomUp(new ExprGenerator());
 			}
 		});
 		// vrednost zavrsila na expr stacku
@@ -133,9 +133,9 @@ public class CodeGenerator extends VisitorAdaptor {
 
 	@Override
 	public void visit(PrintStmt printStmt) {
-		printStmt.getExpr().traverseBottomUp(new ExprGenerator());
+		printStmt.getExpr1().traverseBottomUp(new ExprGenerator());
 		Code.put(Code.const_1);
-		if(printStmt.getExpr().struct == Tab.charType) {
+		if(printStmt.getExpr1().struct == Tab.charType) {
 			Code.put(Code.bprint);
 		} else {
 			Code.put(Code.print);
@@ -144,9 +144,9 @@ public class CodeGenerator extends VisitorAdaptor {
 
 	@Override
 	public void visit(PrintStmtOptional printStmt) {
-		printStmt.getExpr().traverseBottomUp(new ExprGenerator());
+		printStmt.getExpr1().traverseBottomUp(new ExprGenerator());
 		Code.load(new Obj(Obj.Con, "$", Tab.intType, printStmt.getNumber(), 0));
-		if(printStmt.getExpr().struct == Tab.charType) {
+		if(printStmt.getExpr1().struct == Tab.charType) {
 			Code.put(Code.bprint);
 		} else {
 			Code.put(Code.print);

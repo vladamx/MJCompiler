@@ -54,7 +54,7 @@ scan with {:
 :}
 
 
-terminal BREAK, READ, DO,WHILE, EXTENDS, AND, OR,ASSIGN, NOTEQUAL,GREATER, GREATER_EQUAL, LOWER, LOWER_EQUAL, SAME, NOT_SAME, CONTINUE,  CLASS, ELSE, IF, PROG, LBRACE, RBRACE, SEMI, LPAREN, RPAREN, COMMA, PRINT, RETURN, EQUAL, VOID, CONST, ENUM, INCREMENT, DECREMENT, LBRACKET, RBRACKET, PLUS, MINUS, MOD, DIV, MUL, POINT, NEW;
+terminal BREAK, READ, TERNARY_IF, TERNARY_ELSE, DO,WHILE, EXTENDS, AND, OR,ASSIGN, NOTEQUAL,GREATER, GREATER_EQUAL, LOWER, LOWER_EQUAL, SAME, NOT_SAME, CONTINUE,  CLASS, ELSE, IF, PROG, LBRACE, RBRACE, SEMI, LPAREN, RPAREN, COMMA, PRINT, RETURN, EQUAL, VOID, CONST, ENUM, INCREMENT, DECREMENT, LBRACKET, RBRACKET, PLUS, MINUS, MOD, DIV, MUL, POINT, NEW;
 terminal Integer NUMBER;
 terminal Boolean BOOLEAN;
 terminal Character CHAR;
@@ -69,7 +69,7 @@ nonterminal ArrayDesignator;
 nonterminal ErrorNonTerm;
 
 nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName, Designator, MethodDecl, MethodTypeName, ConstDeclItem, EnumDeclItem, EnumDesignatorFactorItem;
-nonterminal rs.etf.pp1.symboltable.concepts.Struct Type, Term, Expr, Factor, TypeLiteral, SymbolDeclList;
+nonterminal rs.etf.pp1.symboltable.concepts.Struct Type, Term, Expr,Expr1, Factor, TypeLiteral, SymbolDeclList;
 
 Program ::= (Program) PROG ProgName:p  SymbolDeclList LBRACE MethodDeclList RBRACE
 		  ;
@@ -164,7 +164,7 @@ StatementList ::= (Statements) StatementList Statement
 				;
 
 
-Statement ::= (AssignmentStmt) Designator EQUAL Expr SEMI
+Statement ::= (AssignmentStmt) Designator EQUAL Expr1 SEMI
 			|
 			(ErrAssignmentStmt) Designator EQUAL error SEMI
 			{: parser.log.debug("Uspesan oporavak od greske pri dodeli vrednosti."); :}
@@ -173,12 +173,17 @@ Statement ::= (AssignmentStmt) Designator EQUAL Expr SEMI
 			|
 			(DecrementStmt) Designator DECREMENT SEMI
 			|
-			(PrintStmt) PRINT LPAREN Expr RPAREN SEMI
+			(PrintStmt) PRINT LPAREN Expr1 RPAREN SEMI
 			|
-			(PrintStmtOptional) PRINT LPAREN Expr COMMA NUMBER:number RPAREN SEMI
+			(PrintStmtOptional) PRINT LPAREN Expr1 COMMA NUMBER:number RPAREN SEMI
 			|
 			(ReadStmt) READ LPAREN Designator RPAREN SEMI
 			;
+
+Expr1 ::= (TernaryExpr) Expr:condExpr TERNARY_IF Expr:truthyExpr TERNARY_ELSE Expr:falsyExpr
+		|
+		(RegularExpr) Expr:expr
+		;
 
 Expr ::= (AddExpr) Expr Addop Term
 		|
@@ -194,11 +199,11 @@ Term ::= (MulExprTerm) Term Mulop Factor
 
 Factor ::= (LiteralFactor) TypeLiteral
 		|
-		(BracketExprFactor) LPAREN Expr RPAREN
+		(BracketExprFactor) LPAREN Expr1 RPAREN
 		|
 		(AllocStructFactor) NEW Type
 		|
-		(AllocArrayFactor) NEW Type LBRACKET Expr RBRACKET
+		(AllocArrayFactor) NEW Type LBRACKET Expr1 RBRACKET
 		|
 		(EnumDesignatorFactor) EnumDesignatorFactorItem
 		|
@@ -210,7 +215,7 @@ EnumDesignatorFactorItem ::= (EnumDesignatorFactorItem) IDENT:name POINT IDENT:f
 
 Designator ::= (NameDesignator) IDENT:name
 			|
-			(ArrayFieldDesignator) ArrayDesignator LBRACKET Expr RBRACKET
+			(ArrayFieldDesignator) ArrayDesignator LBRACKET Expr1 RBRACKET
 			;
 
 ArrayDesignator::= (NameArrayDesignator) IDENT:name

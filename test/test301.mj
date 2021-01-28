@@ -22,32 +22,35 @@ program test301
 		bodovi = bodovi + jedan;
 		bodovi = bodovi * pet;
 		bodovi--;
-		print(bodovi); 
+		print(bodovi);
 
 		niz = new int[2];
 		niz[nula] = pet;
 		niz[1] = Broj.DESET;
 		bodovi = niz[1]/niz[0];
-		print(bodovi); 
+		print(bodovi);
 		print(niz[Broj.JEDAN]);
-		
-		
+
+
 		nizch = new char[3];
 		nizch[0] = 'a';
 		nizch[jedan] = 'b';
 		nizch[pet - 3] = 'c';
 		print( nizch[2 - 1]);
 		print( nizch[jedan * 2]);
-			
-		
-		bodovi = bodovi + ((pet * jedan - 1) * 2 - (3 % 2 + 3 * 2 - 3) - Broj.JEDAN * 0); 
+
+
+		bodovi = bodovi + ((pet * jedan - 1) * 2 - (3 % 2 + 3 * 2 - 3) - Broj.JEDAN * 0);
 		print(bodovi);
 
 
 		read(bodovi);
 		bodovi = bodovi + 1;
 		print(bodovi);
-			
-	
+
+		// Test test test
+		print(bodovi);
+
+
 	}
 }

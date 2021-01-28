@@ -63,6 +63,7 @@ import java_cup.runtime.Symbol;
 	"\b" 	{ }
 	"\t" 	{ }
 	"\r\n" 	{ }
+	"\n" 	{ }
 	"\f" 	{ }
 
 	/* keywords */
@@ -109,6 +110,8 @@ import java_cup.runtime.Symbol;
 	"]" 		{ return new_symbol(sym.RBRACKET, yytext()); }
 	"{" 		{ return new_symbol(sym.LBRACE, yytext()); }
 	"}"			{ return new_symbol(sym.RBRACE, yytext()); }
+	"?"			{ return new_symbol(sym.TERNARY_IF, yytext()); }
+	":"			{ return new_symbol(sym.TERNARY_ELSE, yytext()); }
 
 	/* constants */
     [0-9]+                        { return new_symbol(sym.NUMBER, new Integer (yytext())); }
@@ -122,6 +125,7 @@ import java_cup.runtime.Symbol;
 
 <COMMENT> .      { yybegin(COMMENT); }
 <COMMENT> "\r\n" { yybegin(YYINITIAL); }
+<COMMENT> "\n"   { yybegin(YYINITIAL); }
 
 // This needs to be on the bottom, because it has the least priority.
 . { System.err.println("Leksicka greska ("+yytext()+") u liniji "+(yyline+1) + ", kolona " + yycolumn); }
