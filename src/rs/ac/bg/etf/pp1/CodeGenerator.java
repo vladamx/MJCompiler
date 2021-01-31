@@ -1,11 +1,12 @@
 package rs.ac.bg.etf.pp1;
 
+import rs.ac.bg.etf.pp1.ast.*;
 import rs.ac.bg.etf.pp1.codegen.ExprGenerator;
 import rs.ac.bg.etf.pp1.semantics.CounterVisitor;
-import rs.ac.bg.etf.pp1.ast.*;
 import rs.etf.pp1.mj.runtime.Code;
 import rs.etf.pp1.symboltable.Tab;
 import rs.etf.pp1.symboltable.concepts.Obj;
+import rs.etf.pp1.symboltable.concepts.Struct;
 
 public class CodeGenerator extends VisitorAdaptor {
 
@@ -51,7 +52,7 @@ public class CodeGenerator extends VisitorAdaptor {
 				@Override
 				public void visit(ArrayFieldDesignator designator) {
 					//NOTE: Here we know that we want array field. Address is already here.
-					designator.obj = new Obj(Obj.Elem ,"$", designator.obj.getType().getElemType());
+					designator.obj = new Obj(Obj.Elem ,"$", new Struct(designator.obj.getType().getKind()));
 					// i
 					designator.getExpr1().traverseBottomUp(new ExprGenerator());
 				}

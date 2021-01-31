@@ -4,6 +4,8 @@ import rs.ac.bg.etf.pp1.ast.*;
 import rs.etf.pp1.mj.runtime.Code;
 import rs.etf.pp1.symboltable.Tab;
 import rs.etf.pp1.symboltable.concepts.Obj;
+import rs.etf.pp1.symboltable.concepts.Struct;
+
 
 public class ExprGenerator extends VisitorAdaptor {
     public void visit(NameDesignator nameDesignator) {
@@ -74,7 +76,7 @@ public class ExprGenerator extends VisitorAdaptor {
     @Override
     public void visit(ArrayFieldDesignator designator) {
         // NOTE: element access - adr and index already on stack
-        designator.obj = new Obj(Obj.Elem ,"$", designator.obj.getType().getElemType());
+        designator.obj = new Obj(Obj.Elem ,"$", new Struct(designator.obj.getType().getKind()));
         Code.load(designator.obj);
     }
 
