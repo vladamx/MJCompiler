@@ -1,7 +1,9 @@
 package rs.ac.bg.etf.pp1;
 
+import org.apache.log4j.Logger;
 import rs.ac.bg.etf.pp1.ast.*;
-import rs.ac.bg.etf.pp1.codegen.ExprGenerator;
+import rs.ac.bg.etf.pp1.codegen.RegularExprGenerator;
+import rs.ac.bg.etf.pp1.codegen.TernaryExprGenerator;
 import rs.ac.bg.etf.pp1.semantics.CounterVisitor;
 import rs.etf.pp1.mj.runtime.Code;
 import rs.etf.pp1.symboltable.Tab;
@@ -11,6 +13,7 @@ import rs.etf.pp1.symboltable.concepts.Struct;
 public class CodeGenerator extends VisitorAdaptor {
 
 	private int mainPc;
+	Logger log = Logger.getLogger(getClass());
 
 	public int getMainPc() {
 		return mainPc;
@@ -54,11 +57,20 @@ public class CodeGenerator extends VisitorAdaptor {
 					//NOTE: Here we know that we want array field. Address is already here.
 					designator.obj = new Obj(Obj.Elem ,"$", new Struct(designator.obj.getType().getKind()));
 					// i
-					designator.getExpr1().traverseBottomUp(new ExprGenerator());
+					// NOTE: this check for a type of expression is ugly = Refactor and reuse this
+					if(designator.getExpr1().getClass() == TernaryExpr.class) {
+						designator.getExpr1().traverseBottomUp(new TernaryExprGenerator());
+					} else {
+						designator.getExpr1().traverseBottomUp(new RegularExprGenerator());
+					}
 				}
 			});
 		}
-		assignment.getExpr1().traverseBottomUp(new ExprGenerator());
+		if(assignment.getExpr1().getClass() == TernaryExpr.class) {
+			assignment.getExpr1().traverseBottomUp(new TernaryExprGenerator());
+		} else {
+			assignment.getExpr1().traverseBottomUp(new RegularExprGenerator());
+		}
 		Code.store(assignment.getDesignator().obj);
 	}
 
@@ -75,7 +87,11 @@ public class CodeGenerator extends VisitorAdaptor {
 				//NOTE: Here we know that we want array field. Address is already here.
 				designator.obj = new Obj(Obj.Elem ,"$", designator.obj.getType().getElemType());
 				// i
-				designator.getExpr1().traverseBottomUp(new ExprGenerator());
+				if(designator.getExpr1().getClass() == TernaryExpr.class) {
+					designator.getExpr1().traverseBottomUp(new TernaryExprGenerator());
+				} else {
+					designator.getExpr1().traverseBottomUp(new RegularExprGenerator());
+				}
 			}
 		});
 		Code.load(stmt.getDesignator().obj);
@@ -97,7 +113,11 @@ public class CodeGenerator extends VisitorAdaptor {
 				//NOTE: Here we know that we want array field. Address is already here.
 				designator.obj = new Obj(Obj.Elem ,"$", designator.obj.getType().getElemType());
 				// i
-				designator.getExpr1().traverseBottomUp(new ExprGenerator());
+				if(designator.getExpr1().getClass() == TernaryExpr.class) {
+					designator.getExpr1().traverseBottomUp(new TernaryExprGenerator());
+				} else {
+					designator.getExpr1().traverseBottomUp(new RegularExprGenerator());
+				}
 			}
 		});
 		Code.load(stmt.getDesignator().obj);
@@ -119,7 +139,11 @@ public class CodeGenerator extends VisitorAdaptor {
 				//NOTE: Here we know that we want array field. Address is already here.
 				designator.obj = new Obj(Obj.Elem ,"$", designator.obj.getType().getElemType());
 				// i
-				designator.getExpr1().traverseBottomUp(new ExprGenerator());
+				if(designator.getExpr1().getClass() == TernaryExpr.class) {
+					designator.getExpr1().traverseBottomUp(new TernaryExprGenerator());
+				} else {
+					designator.getExpr1().traverseBottomUp(new RegularExprGenerator());
+				}
 			}
 		});
 		// vrednost zavrsila na expr stacku
@@ -134,7 +158,11 @@ public class CodeGenerator extends VisitorAdaptor {
 
 	@Override
 	public void visit(PrintStmt printStmt) {
-		printStmt.getExpr1().traverseBottomUp(new ExprGenerator());
+		if(printStmt.getExpr1().getClass() == TernaryExpr.class) {
+			printStmt.getExpr1().traverseBottomUp(new TernaryExprGenerator());
+		} else {
+			printStmt.getExpr1().traverseBottomUp(new RegularExprGenerator());
+		}
 		Code.put(Code.const_1);
 		if(printStmt.getExpr1().struct == Tab.charType) {
 			Code.put(Code.bprint);
@@ -145,7 +173,11 @@ public class CodeGenerator extends VisitorAdaptor {
 
 	@Override
 	public void visit(PrintStmtOptional printStmt) {
-		printStmt.getExpr1().traverseBottomUp(new ExprGenerator());
+		if(printStmt.getExpr1().getClass() == TernaryExpr.class) {
+			printStmt.getExpr1().traverseBottomUp(new TernaryExprGenerator());
+		} else {
+			printStmt.getExpr1().traverseBottomUp(new RegularExprGenerator());
+		}
 		Code.load(new Obj(Obj.Con, "$", Tab.intType, printStmt.getNumber(), 0));
 		if(printStmt.getExpr1().struct == Tab.charType) {
 			Code.put(Code.bprint);

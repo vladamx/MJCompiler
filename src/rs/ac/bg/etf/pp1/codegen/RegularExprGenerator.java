@@ -1,5 +1,6 @@
 package rs.ac.bg.etf.pp1.codegen;
 
+import org.apache.log4j.Logger;
 import rs.ac.bg.etf.pp1.ast.*;
 import rs.etf.pp1.mj.runtime.Code;
 import rs.etf.pp1.symboltable.Tab;
@@ -7,7 +8,9 @@ import rs.etf.pp1.symboltable.concepts.Obj;
 import rs.etf.pp1.symboltable.concepts.Struct;
 
 
-public class ExprGenerator extends VisitorAdaptor {
+public class RegularExprGenerator extends VisitorAdaptor {
+    Logger log = Logger.getLogger(getClass());
+
     public void visit(NameDesignator nameDesignator) {
         Code.load(nameDesignator.obj);
     }
@@ -31,7 +34,6 @@ public class ExprGenerator extends VisitorAdaptor {
         }
         Code.load(found);
     }
-
 
     @Override
     public void visit(BoolLiteral constant) {

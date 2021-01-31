@@ -1,4 +1,5 @@
 package rs.ac.bg.etf.pp1;
+
 import org.apache.log4j.Logger;
 import rs.ac.bg.etf.pp1.ast.*;
 import rs.ac.bg.etf.pp1.symboltable.Bool;
@@ -245,7 +246,13 @@ public class SemanticPass extends VisitorAdaptor {
 	}
 
 	public void visit(TernaryExpr ternaryExpr) {
-//		ternaryExpr.struct = ternaryExpr..struct;
+		ternaryExpr.struct = Tab.intType;
+		if( ternaryExpr.getExpr().struct.getKind() != Struct.Int &&  ternaryExpr.getExpr().struct.getKind() != Bool.kind) {
+			report_error("Greska na liniji " + ternaryExpr.getLine() + ": uslov mora da bude boolean ili int!", null);
+		}
+		if( ternaryExpr.getExpr1().struct.getKind() != Struct.Int || ternaryExpr.getExpr2().struct.getKind() != Struct.Int) {
+			report_error("Greska na liniji "+ ternaryExpr.getLine() + ": izrazi moraju da budu int kompaktibilni!",null);
+		}
 	}
 
 	public void visit(RegularExpr regularExpr) {
