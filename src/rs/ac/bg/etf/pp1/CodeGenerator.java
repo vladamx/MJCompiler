@@ -164,7 +164,7 @@ public class CodeGenerator extends VisitorAdaptor {
 			printStmt.getExpr1().traverseBottomUp(new RegularExprGenerator());
 		}
 		Code.put(Code.const_1);
-		if(printStmt.getExpr1().struct == Tab.charType) {
+		if(printStmt.getExpr1().struct.getKind() == Tab.charType.getKind()) {
 			Code.put(Code.bprint);
 		} else {
 			Code.put(Code.print);

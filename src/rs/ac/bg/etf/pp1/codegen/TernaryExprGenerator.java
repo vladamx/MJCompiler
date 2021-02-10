@@ -11,8 +11,8 @@ public class TernaryExprGenerator extends VisitorAdaptor {
     @Override
     public void visit(TernaryExpr expr) {
         expr.getExpr().traverseBottomUp(new RegularExprGenerator());
-        Code.load(new Obj(Obj.Con,"$", Tab.intType, 1, 1));
-        Code.putFalseJump(0,0);
+        Code.load(new Obj(Obj.Con,"$", Tab.intType, 0, 1));
+        Code.putFalseJump(1,0);
         int fixupAddress = Code.pc - 2;
         expr.getExpr1().traverseBottomUp(new RegularExprGenerator());
         Code.putJump(0);

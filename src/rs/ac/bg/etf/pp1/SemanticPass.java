@@ -246,13 +246,10 @@ public class SemanticPass extends VisitorAdaptor {
 	}
 
 	public void visit(TernaryExpr ternaryExpr) {
-		ternaryExpr.struct = Tab.intType;
-		if( ternaryExpr.getExpr().struct.getKind() != Struct.Int &&  ternaryExpr.getExpr().struct.getKind() != Bool.kind) {
-			report_error("Greska na liniji " + ternaryExpr.getLine() + ": uslov mora da bude boolean ili int!", null);
+		if(ternaryExpr.getExpr1().struct.getKind() != ternaryExpr.getExpr2().struct.getKind()) {
+			report_error("Greska na liniji "+ ternaryExpr.getLine() + ": izrazi moraju da budu kompaktibilni!",null);
 		}
-		if( ternaryExpr.getExpr1().struct.getKind() != Struct.Int || ternaryExpr.getExpr2().struct.getKind() != Struct.Int) {
-			report_error("Greska na liniji "+ ternaryExpr.getLine() + ": izrazi moraju da budu int kompaktibilni!",null);
-		}
+		ternaryExpr.struct = new Struct(ternaryExpr.getExpr1().struct.getKind());
 	}
 
 	public void visit(RegularExpr regularExpr) {
